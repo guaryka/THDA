@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THDA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        .highlight {
+            color: #f39c12;
+        }
+    </style>
+</head>
+
+<body class="container mt-5">
+    <h2 class="text-center mb-4">MINH HỌA GIẢI THUẬT PRIORITY SCHEDULING</h2>
+
+    <form class="mb-4" onsubmit="event.preventDefault(); handleSubmit();">
+        <div class="mb-3">
+            <label for="quantity" class="form-label">Số lượng tiến trình:</label>
+            <input type="number" id="quantity" name="quantity" class="form-control" min="1" required>
+        </div>
+
+        <button type="button" class="btn btn-primary mb-3" onclick="generateProcess()">Khởi tạo tiến trình</button>
+
+        <div id="processesContainer"></div>
+
+        <button type="submit" class="btn btn-success" style="display:none">Kiểm tra</button>
+    </form>
+
+    <div class="modal fade" id="processCreateModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="processName" class="form-label">Tên tiến trình:</label>
+                        <input type="text" id="processName" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="arrivalTime" class="form-label">Thời điểm đến:</label>
+                        <input type="number" id="arrivalTime" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="burstTime" class="form-label">Thời gian bùng nổ:</label>
+                        <input type="number" id="burstTime" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="priority" class="form-label">Độ ưu tiên:</label>
+                        <input type="number" id="priority" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" onclick="saveModalData()">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <script src="/script.js"></script>
+</body>
+
+</html>
