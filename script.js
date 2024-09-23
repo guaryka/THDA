@@ -90,3 +90,77 @@ function saveModalData() {
     const modal = bootstrap.Modal.getInstance(modalElement);
     modal.hide();
 }
+
+// objectData.sort((a, b) => {
+//     if (a.priority === b.priority) {
+//         return a.arrivalTime - b.arrivalTime;
+//     }
+//     return a.priority - b.priority;
+// });
+
+function generateScheduleTable(objectData) {
+    objectData.sort((a, b) => {
+        if (a.priority === b.priority) {
+            return a.arrivalTime - b.arrivalTime;
+        }
+        return a.priority - b.priority;
+    });
+
+    let table = "<table class='table'><thead><tr><th>Thời gian</th>";
+    objectData.forEach(p => {
+        table += `<th>${p.processName}</th>`;
+    });
+    table += "</tr></thead><tbody>";
+
+    let currentTime = 0;
+    let remainingProcesses = [...objectData];
+
+    while (remainingProcesses.length > 0) {
+        let availableProcesses = remainingProcesses.filter(p => p.arrivalTime <= currentTime);
+
+        if (availableProcesses.length === 0) {
+            table += `<tr><td>${currentTime}</td>`;
+            objectData.forEach(p => {
+                table += "<td></td>";
+            });
+            table += "</tr>";
+            currentTime++;
+            continue;
+        }
+
+        availableProcesses.sort((a, b) => a.priority - b.priority);
+        let currentProcess = availableProcesses[0];
+
+        table += `<tr><td>${currentTime}</td>`;
+        objectData.forEach(p => {
+            if (p === currentProcess) {
+                table += `<td>Bắt đầu</td>`;
+            } else {
+                table += "<td></td>";
+            }
+        });
+        table += "</tr>";
+        currentTime++;
+
+        for (let i = 1; i <= currentProcess.burstTime; i++) {
+            table += `<tr><td>${currentTime}</td>`;
+            objectData.forEach(p => {
+                if (p === currentProcess) {
+                    if (i < currentProcess.burstTime) {
+                        table += `<td>${i}</td>`;
+                    } else {
+                        table += "<td>Kết thúc</td>";
+                    }
+                } else {
+                    table += "<td></td>";
+                }
+            });
+            table += "</tr>";
+            currentTime++;
+        }
+        remainingProcesses = remainingProcesses.filter(p => p !== currentProcess);
+    }
+
+    table += "</tbody></table>";
+    document.getElementById("scheduleContainer").innerHTML = table;
+}
