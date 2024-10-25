@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Non-Preemptive Priority Scheduling</title>
+    <style>
+        table,
+        th,
+        td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .running {
+            background-color: yellow;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Scheduling Timeline</h2>
+    <table id="timelineTable">
+        <thead>
+            <tr id="timelineHeader">
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        const processes = [
+            { id: 'P1', arrivalTime: 0, burstTime: 11, priority: 2 },
+            { id: 'P2', arrivalTime: 5, burstTime: 28, priority: 0 },
+            { id: 'P3', arrivalTime: 12, burstTime: 2, priority: 3 },
+            { id: 'P4', arrivalTime: 2, burstTime: 10, priority: 1 },
+            { id: 'P5', arrivalTime: 9, burstTime: 16, priority: 4 },
+        ];
+
+        let CPU = 0;
+        const timeline = [];
+        const processBursts = {}; // Lưu trạng thái burst time còn lại cho mỗi tiến trình
+
+        // Tạo bản sao burstTime cho từng tiến trình
+        processes.forEach(p => processBursts[p.id] = p.burstTime);
+
+        function scheduleProcesses() {
+            while (processes.length > 0) {
+                // Lấy các tiến trình có thể thực hiện tại thời điểm CPU
+                const availableProcesses = processes.filter(p => p.arrivalTime <= CPU);
+
+                if (availableProcesses.length > 0) {
+                    availableProcesses.sort((a, b) => a.priority - b.priority);
+                    const currentProcess = availableProcesses[0];
+
+                    // Cập nhật trạng thái cho mỗi thời điểm của timeline
+                    const row = { time: CPU };
+                    processes.forEach(p => {
+                        if (p.id === currentProcess.id && processBursts[p.id] > 0) {
+                            row[p.id] = processBursts[p.id];
+                            processBursts[p.id]--;
+                        } else {
+                            row[p.id] = '-';
+                        }
+                    });
+                    timeline.push(row);
+
+                    CPU++;
+                    if (processBursts[currentProcess.id] === 0) {
+                        processes.splice(processes.indexOf(currentProcess), 1); // Xóa tiến trình khi hoàn tất
+                    }
+                } else {
+                    // Nếu không có tiến trình nào có thể thực hiện
+                    timeline.push({ time: CPU });
+                    CPU++;
+                }
+            }
+        }
+
+        function renderTimelineTable() {
+            const headerRow = document.getElementById("timelineHeader");
+            const tbody = document.querySelector("#timelineTable tbody");
+
+            // Thêm tiêu đề cho mỗi tiến trình
+            processes.forEach(p => {
+                const th = document.createElement("th");
+                th.textContent = p.id;
+                headerRow.appendChild(th);
+            });
+
+            // Tạo hàng cho mỗi thời điểm trong timeline
+            timeline.forEach(entry => {
+                const row = document.createElement("tr");
+                const timeCell = document.createElement("td");
+                timeCell.textContent = entry.time;
+                row.appendChild(timeCell);
+
+                processes.forEach(p => {
+                    const cell = document.createElement("td");
+                    if (entry[p.id] !== undefined) {
+                        cell.textContent = entry[p.id];
+                        if (entry[p.id] !== '-') cell.classList.add("running");
+                    } else {
+                        cell.textContent = "-";
+                    }
+                    row.appendChild(cell);
+                });
+
+                tbody.appendChild(row);
+            });
+        }
+
+        // Thực thi lịch biểu và hiển thị bảng
+        scheduleProcesses();
+        renderTimelineTable();
+    </script>
+
+</body>
+
+</html>

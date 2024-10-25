@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Priority Scheduling</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .highlight {
+            background-color: yellow;
+            /* Màu nền vàng */
+        }
+    </style>
+</head>
+
+<body>
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link" href="docquyen.html">Độc quyền</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="#">Không độc quyền</a>
+        </li>
+    </ul>
+
+    <div class="container mt-5">
+        <button class="btn btn-primary" data-toggle="modal" data-target="#processModal">Nhập Thông Tin Tiến
+            Trình</button>
+
+        <h2 class="mt-4">Danh Sách Tiến Trình</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Process No</th>
+                    <th>Arrival Time</th>
+                    <th>Burst Time</th>
+                    <th>Priority</th>
+                </tr>
+            </thead>
+            <tbody id="processListBody">
+            </tbody>
+        </table>
+
+        <h2>Bảng Kết Quả</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Process No</th>
+                    <th>Start Time</th>
+                    <th>Complete Time</th>
+                    <th>Turnaround Time</th>
+                    <th>Waiting Time</th>
+                </tr>
+            </thead>
+            <tbody id="processTableBody">
+            </tbody>
+        </table>
+
+        <h2>Bảng Thời Gian Chạy</h2>
+        <table>
+            <tbody id="runTimeTableBody">
+            </tbody>
+        </table>
+
+        <h2>Biểu đồ Gantt</h2>
+        <table id="ganttChart">
+            <tbody id="ganttTableBody">
+                <!-- Hàng biểu đồ Gantt sẽ được tạo tự động -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="processModal" tabindex="-1" role="dialog" aria-labelledby="processModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="processModalLabel">Nhập Thông Tin Tiến Trình</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="numProcesses">Số tiến trình:</label>
+                        <input type="number" class="form-control" id="numProcesses" min="1" value="5">
+                    </div>
+                    <div id="processInputs"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="createProcessInputs()">Tạo Form Nhập</button>
+                    <button type="button" class="btn btn-success" onclick="inputProcesses()">Lưu</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="khongdocquyen.js"></script>
+</body>
+
+</html>
