@@ -11,6 +11,8 @@ class Process {
 
 let processes = [];
 
+let processTimeline = [];
+
 function createProcessInputs() {
     const numProcesses = parseInt(document.getElementById("numProcesses").value);
     const processInputsDiv = document.getElementById("processInputs");
@@ -105,14 +107,13 @@ function displayResults() {
 
     // Gọi displayRunTimeTable với đúng dữ liệu
     displayRunTimeTable(ctime[processes.length - 1], processes);
-    displayGanttChart(stime, ctime);
 }
 
 function displayRunTimeTable(maxTime, processes) {
     const runTimeTableBody = document.getElementById("runTimeTableBody");
-    runTimeTableBody.innerHTML = ""; // Xóa dữ liệu cũ
+    runTimeTableBody.innerHTML = ""; // Clear previous data
 
-    // Tạo hàng đầu tiên cho thời gian và cột tiến trình
+    // Create header row for time and processes
     const headerRow = document.createElement("tr");
     const timeHeader = document.createElement("th");
     timeHeader.textContent = "Time";
@@ -127,7 +128,11 @@ function displayRunTimeTable(maxTime, processes) {
 
     let currentTime = 0;
 
-    // Duyệt qua từng thời điểm từ 0 đến maxTime
+    // To store the start and end times
+    let startTimes = new Array(processes.length).fill(null);
+    let endTimes = new Array(processes.length).fill(null);
+
+    // Loop through each time unit
     while (currentTime <= maxTime) {
         const row = document.createElement("tr");
         const timeCell = document.createElement("td");
@@ -136,43 +141,59 @@ function displayRunTimeTable(maxTime, processes) {
 
         let selectedProcess = null;
 
-        // Tìm tiến trình có thể chạy tại currentTime
+        // Find the process that can run at currentTime
         processes.forEach(process => {
-            if (process.at <= currentTime && process.bt > 0) { // Chỉ xét tiến trình còn Burst Time
+            if (process.at <= currentTime && process.bt > 0) { // Only consider processes with remaining burst time
                 if (!selectedProcess || process.pr < selectedProcess.pr) {
-                    selectedProcess = process; // Chọn tiến trình có Priority cao nhất
+                    selectedProcess = process; // Choose the process with highest priority
                 }
             }
         });
 
-        // Tạo các ô cho từng tiến trình
+        // Store the current time and selected process in the processTimeline array
+        if (selectedProcess) {
+            processTimeline.push({
+                time: currentTime,
+                process: `P${selectedProcess.pno}`
+            });
+        }
+
+        // Create cells for each process
         processes.forEach(process => {
             const cell = document.createElement("td");
             if (selectedProcess && process.pno === selectedProcess.pno) {
-                if (selectedProcess.startTime === null) {
-                    selectedProcess.startTime = currentTime; // Ghi lại startTime
+                if (startTimes[process.pno - 1] === null) {
+                    startTimes[process.pno - 1] = currentTime; // Record start time
                 }
-                cell.textContent = selectedProcess.bt; // Thời gian còn lại
-                cell.classList.add("highlight"); // Thêm màu cho tiến trình đang chạy
-                selectedProcess.bt--; // Giảm Burst Time
+                cell.textContent = selectedProcess.bt; // Remaining burst time
+                cell.classList.add("highlight"); // Add highlight class for the running process
+                selectedProcess.bt--; // Decrease burst time
                 if (selectedProcess.bt === 0) {
-                    selectedProcess.completeTime = currentTime + 1; // Ghi lại completeTime
+                    endTimes[process.pno - 1] = currentTime + 1; // Record complete time
                 }
             } else {
-                cell.textContent = ""; // Ô trống nếu không chạy
+                cell.textContent = ""; // Empty cell if process is not running
             }
             row.appendChild(cell);
         });
 
-        runTimeTableBody.appendChild(row); // Thêm hàng vào bảng
+        runTimeTableBody.appendChild(row); // Append the row to the table
         currentTime++;
     }
 
-    // Hiển thị thông tin thời gian bắt đầu và hoàn thành
+    // Log the start and end times for each process
     processes.forEach(process => {
-        console.log(`Process P${process.pno}: Start Time = ${process.startTime}, Complete Time = ${process.completeTime}`);
+        console.log(`Process P${process.pno}: Start Time = ${startTimes[process.pno - 1]}, Complete Time = ${endTimes[process.pno - 1]}`);
     });
+
+    // Log the process timeline
+    console.log("Process Timeline:", processTimeline);
+
+    // Call function to update the Gantt Chart
+    displayGanttChart(processTimeline);
+    console.log("Process Timeline:", processTimeline);
 }
+
 
 function inputProcesses() {
     const numProcesses = parseInt(document.getElementById("numProcesses").value);
@@ -207,36 +228,60 @@ function inputProcesses() {
     displayResults();
 }
 
-function displayGanttChart(stime, ctime) {
-    const ganttTableBody = document.getElementById("ganttChartBody");
-    ganttTableBody.innerHTML = ""; // Xóa dữ liệu cũ
+function displayGanttChart(processTimeline) {
+    console.log(processTimeline);
+    const ganttTableBody = document.getElementById("ganttTableBody");
+    ganttTableBody.innerHTML = ""; // Clear old data
 
-    // Tạo hàng cho Gantt Chart
-    const row = document.createElement("tr");
-    stime.forEach(time => {
-        const cell = document.createElement("td");
-        cell.textContent = time;
-        row.appendChild(cell);
-    });
-    ganttTableBody.appendChild(row);
+    // Create a row for the Gantt chart
+    const ganttRow = document.createElement("tr");
 
-    const processRow = document.createElement("tr");
-    processes.forEach(process => {
-        const cell = document.createElement("td");
-        cell.textContent = `P${process.pno}`;
-        processRow.appendChild(cell);
-    });
-    ganttTableBody.appendChild(processRow);
+    // Add "Time" as the first column
+    const timeHeaderCell = document.createElement("td");
+    timeHeaderCell.textContent = "Time";
+    ganttRow.appendChild(timeHeaderCell);
 
-    // Thêm hàng thời gian hoàn thành
-    const ctimeRow = document.createElement("tr");
-    ctime.forEach(time => {
-        const cell = document.createElement("td");
-        cell.textContent = time;
-        ctimeRow.appendChild(cell);
+    // Variables to track the last process and its start time
+    let lastProcess = null;
+    let startTime = null;
+
+    processTimeline.forEach((entry, index) => {
+        // If the current process is different from the last one, create new columns
+        if (entry.process !== lastProcess) {
+            // If there's a previous process, create a cell for the previous time
+            if (lastProcess !== null) {
+                const timeCell = document.createElement("td");
+                timeCell.textContent = startTime;
+                ganttRow.appendChild(timeCell);
+
+                const processCell = document.createElement("td");
+                processCell.textContent = lastProcess;
+                ganttRow.appendChild(processCell);
+            }
+
+            // Set the start time for the new process
+            startTime = entry.time;
+            lastProcess = entry.process;
+        }
     });
-    ganttTableBody.appendChild(ctimeRow);
+
+    // Add the final process at the end
+    if (lastProcess !== null) {
+        const timeCell = document.createElement("td");
+        timeCell.textContent = startTime;
+        ganttRow.appendChild(timeCell);
+
+        const processCell = document.createElement("td");
+        processCell.textContent = lastProcess;
+        ganttRow.appendChild(processCell);
+    }
+
+    // Add the final time (currentTime + 1) at the end of the row
+    const timeCell = document.createElement("td");
+    timeCell.textContent = processTimeline[processTimeline.length - 1].time + 1; // Time of last process + 1
+    ganttRow.appendChild(timeCell);
+
+    // Add the row to the table
+    ganttTableBody.appendChild(ganttRow);
 }
 
-// Khởi tạo sự kiện cho nút thêm tiến trình
-document.getElementById("addProcessButton").addEventListener("click", createProcessInputs);
