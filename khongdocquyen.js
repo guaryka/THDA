@@ -60,16 +60,20 @@ function displayRunTimeTable(maxTime, processes) {
     runTimeTableBody.innerHTML = "";
 
     const headerRow = document.createElement("tr");
-    const timeHeader = document.createElement("th");
-    timeHeader.textContent = "Time";
-    headerRow.appendChild(timeHeader);
-
-    processes.forEach((process, index) => {
-        const th = document.createElement("th");
-        th.textContent = `P${index + 1}`;
-        headerRow.appendChild(th);
-    });
+    headerRow.innerHTML = "<th>Time</th>" + processes.map(p => `<th>P${p.pno}</th>`).join('');
     runTimeTableBody.appendChild(headerRow);
+
+    // const headerRow = document.createElement("tr");
+    // const timeHeader = document.createElement("th");
+    // timeHeader.textContent = "Time";
+    // headerRow.appendChild(timeHeader);
+
+    // processes.forEach((process, index) => {
+    //     const th = document.createElement("th");
+    //     th.textContent = `P${index + 1}`;
+    //     headerRow.appendChild(th);
+    // });
+    // runTimeTableBody.appendChild(headerRow);
 
     let currentTime = 0;
     let startTimes = new Array(processes.length).fill(null);
